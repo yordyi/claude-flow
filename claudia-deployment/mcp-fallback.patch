@@ -1,0 +1,27 @@
+diff --git a/src-tauri/src/commands/mcp.rs b/src-tauri/src/commands/mcp.rs
+index 1234567..7890123 100644
+--- a/src-tauri/src/commands/mcp.rs
++++ b/src-tauri/src/commands/mcp.rs
+@@ -213,7 +213,18 @@
+ pub async fn mcp_list(app: AppHandle) -> Result<Vec<MCPServer>, String> {
+     info!("Listing MCP servers");
+ 
+-    match execute_claude_mcp_command(&app, vec!["list"]).await {
++    // Check if MCP is available
++    let claude_path = match find_claude_binary(&app) {
++        Ok(path) => path,
++        Err(e) => {
++            info!("Claude binary not found, returning empty server list: {}", e);
++            return Ok(vec![]);
++        }
++    };
++
++    // If using bundled binary, return empty list for now
++    if claude_path == "claude-code" {
++        info!("Using bundled Claude Code, MCP features not fully integrated yet");
++        return Ok(vec![]);
++    }
++
++    match execute_claude_mcp_command(&app, vec!["list"]).await {
+         Ok(output) => {
+             info!("Raw output from 'claude mcp list': {:?}", output);

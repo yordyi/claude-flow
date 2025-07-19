@@ -6,6 +6,14 @@
 echo "🚀 正在启动 Claudia..."
 echo "=================="
 
+# 先执行清理
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/clean.sh" ]; then
+    echo "🧹 执行清理脚本..."
+    "$SCRIPT_DIR/clean.sh"
+    echo ""
+fi
+
 # 设置必要的环境变量
 export PATH="$HOME/.cargo/bin:$PATH"
 
@@ -49,6 +57,18 @@ if [ ! -d "src-tauri" ]; then
 fi
 
 echo "✅ 项目文件检查通过"
+
+# 检查并修复 sidecar 二进制文件
+echo "🔧 检查 Claude Code 二进制文件..."
+if [ -f "src-tauri/binaries/claude-code-aarch64-apple-darwin" ]; then
+    echo "✅ Claude Code 二进制文件存在"
+    # 确保文件有执行权限
+    chmod +x "src-tauri/binaries/claude-code-aarch64-apple-darwin"
+else
+    echo "❌ 错误: Claude Code 二进制文件未找到"
+    echo "   请运行: bun run build:executables:current"
+    exit 1
+fi
 
 # 显示版本信息
 echo "🔧 工具版本:"
